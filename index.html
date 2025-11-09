@@ -11,14 +11,10 @@
             box-sizing: border-box;
             font-family: "Microsoft YaHei", Arial, sans-serif;
         }
-
-        /* 背景：黑色渐变灰色 + 流动星空 */
         body {
             background: linear-gradient(to bottom, #0a0a0a 0%, #222222 100%);
             min-height: 100vh;
             overflow: hidden;
-            transition: background 0.5s;
-            /* 修复GitHub环境下的层叠问题 */
             position: relative;
         }
         #stars {
@@ -29,9 +25,8 @@
             height: 200%;
             z-index: 0;
             animation: starFlow 60s linear infinite;
+            -webkit-animation: starFlow 60s linear infinite;
         }
-
-        /* 首页进入按钮：增强点击区域，修复层叠 */
         #enterBtn {
             position: absolute;
             top: 50%;
@@ -44,23 +39,18 @@
             border-radius: 0;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.3s;
-            z-index: 9999; /* 提升层级，避免被遮挡 */
+            z-index: 9999;
             outline: none;
-            /* 修复GitHub下点击区域失效 */
             display: block;
-            opacity: 1;
             pointer-events: auto;
         }
         #enterBtn:hover {
             background: #666;
         }
-
-        /* 加载文字容器：宽度适配GitHub Pages */
         .text-container {
             position: relative;
-            width: 90%; /* 改为百分比，适配不同屏幕 */
-            max-width: 450px; /* 保留最大宽度 */
+            width: 90%;
+            max-width: 450px;
             height: 300px;
             margin: 50px auto 30px;
             padding: 20px;
@@ -80,8 +70,6 @@
             background: rgba(255, 255, 255, 0.3);
             border-radius: 4px;
         }
-
-        /* 弹窗功能按钮：增强层级 */
         #popupBtn {
             display: block;
             margin: 0 auto 50px;
@@ -92,7 +80,6 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s;
             z-index: 10;
             position: relative;
             outline: none;
@@ -101,8 +88,6 @@
             background: #3182ce;
             box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
         }
-
-        /* 弹窗样式：固定大小+柔和背景+关闭按钮 */
         .popup {
             position: fixed;
             width: 200px;
@@ -121,8 +106,6 @@
             top: 0;
             left: 0;
         }
-
-        /* 弹窗关闭按钮 */
         .close-btn {
             position: absolute;
             top: 5px;
@@ -139,15 +122,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
             outline: none;
         }
         .close-btn:hover {
             background: rgba(0,0,0,0.2);
             color: #333;
         }
-
-        /* 内容容器：修复GitHub下显示问题 */
         .content-wrapper {
             display: none;
             visibility: hidden;
@@ -159,8 +139,6 @@
             visibility: visible;
             opacity: 1;
         }
-
-        /* 星星动画：修复GitHub下动画失效 */
         @keyframes twinkle {
             from { opacity: 0.2; }
             to { opacity: 1; }
@@ -169,7 +147,6 @@
             0% { transform: translateY(0); }
             100% { transform: translateY(-100%); }
         }
-        /* 兼容GitHub Pages动画前缀 */
         @-webkit-keyframes twinkle {
             from { opacity: 0.2; }
             to { opacity: 1; }
@@ -189,9 +166,8 @@
     </div>
 
     <script>
-        // 核心修复：避免GitHub Pages的DOM加载顺序问题
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. 生成流动星空
+            // 生成星空
             const stars = document.getElementById('stars');
             function createStars() {
                 if (!stars) return;
@@ -203,9 +179,7 @@
                     star.style.backgroundColor = 'white';
                     star.style.borderRadius = '50%';
                     star.style.opacity = Math.random() * 0.8 + 0.2;
-                    // 兼容前缀动画
-                    star.style.animation = star.style.webkitAnimation = 
-                        'twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate';
+                    star.style.animation = star.style.webkitAnimation = 'twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate';
                     star.style.top = `${Math.random() * window.innerHeight * 2}px`;
                     star.style.left = `${Math.random() * window.innerWidth}px`;
                     stars.appendChild(star);
@@ -213,7 +187,7 @@
             }
             createStars();
 
-            // 2. 生日贺卡内容（打字机效果）
+            // 贺卡内容
             const birthdayContent = `🎂 亲爱的小伙伴，生日快乐！🎂
 
 愿你的世界里，
@@ -230,10 +204,109 @@
 生日安康，岁岁欢愉！
 `;
 
-            // 3. 修复进入贺卡功能（GitHub Pages核心修复）
+            // 进入贺卡逻辑
             const enterBtn = document.getElementById('enterBtn');
             const contentWrapper = document.getElementById('contentWrapper');
             const birthdayText = document.getElementById('birthdayText');
             let isTyped = false;
 
-            // 确保按钮
+            if (enterBtn) {
+                enterBtn.addEventListener('click', function() {
+                    enterBtn.style.display = 'none';
+                    enterBtn.style.pointerEvents = 'none';
+                    contentWrapper.classList.add('active');
+
+                    if (!isTyped && birthdayText) {
+                        let index = 0;
+                        const typeInterval = setInterval(function() {
+                            if (index < birthdayContent.length) {
+                                birthdayText.textContent += birthdayContent[index];
+                                index++;
+                                birthdayText.scrollTop = birthdayText.scrollHeight;
+                            } else {
+                                clearInterval(typeInterval);
+                                isTyped = true;
+                            }
+                        }, 100);
+                    }
+                });
+            }
+
+            // 弹窗功能
+            const popupBtn = document.getElementById('popupBtn');
+            const popupTexts = [
+                "生日快乐！暴富暴美～",
+                "新岁无忧，岁岁欢愉",
+                "愿你被世界温柔以待",
+                "生日限定，快乐无限",
+                "平安喜乐，得偿所愿",
+                "又长大一岁，继续发光",
+                "三餐四季，温柔有趣",
+                "永远少女心，永远快乐",
+                "解锁人生新章节，万事顺意",
+                "美好和幸运都围绕着你",
+                "生日安康，喜乐常伴",
+                "今天你是主角，要超快乐",
+                "岁岁平安，年年有我",
+                "梦想开花，未来可期",
+                "温柔以待，好运常在"
+            ];
+            const softColors = [
+                '#f0f8fb', '#f5fafe', '#fdf2f8', '#fef7fb',
+                '#f5f5f5', '#f8f8f8', '#faf6ed', '#f7f3e9',
+                '#eaf6fa', '#f0f8e8', '#fcf1f7', '#f5fafe'
+            ];
+            let isGenerating = false;
+            let popupInterval;
+
+            if (popupBtn) {
+                popupBtn.addEventListener('click', function() {
+                    if (!isGenerating) {
+                        popupBtn.textContent = "停止生成祝福";
+                        isGenerating = true;
+                        popupInterval = setInterval(createPopup, 1000);
+                    } else {
+                        popupBtn.textContent = "点击生成生日祝福弹窗";
+                        isGenerating = false;
+                        clearInterval(popupInterval);
+                    }
+                });
+            }
+
+            function createPopup() {
+                const popup = document.createElement('div');
+                popup.className = 'popup';
+                const maxTop = window.innerHeight - 100;
+                const maxLeft = window.innerWidth - 220;
+                const randomTop = Math.floor(Math.random() * maxTop);
+                const randomLeft = Math.floor(Math.random() * maxLeft);
+                popup.style.top = randomTop + 'px';
+                popup.style.left = randomLeft + 'px';
+
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-btn';
+                closeBtn.textContent = '×';
+                closeBtn.addEventListener('click', function() {
+                    popup.style.opacity = '0';
+                    popup.style.transition = 'opacity 0.5s';
+                    setTimeout(() => popup.parentNode?.removeChild(popup), 500);
+                });
+
+                const textIndex = Math.floor(Math.random() * popupTexts.length);
+                const colorIndex = Math.floor(Math.random() * softColors.length);
+                popup.textContent = popupTexts[textIndex];
+                popup.style.backgroundColor = softColors[colorIndex];
+                popup.appendChild(closeBtn);
+                document.body.appendChild(popup);
+            }
+
+            window.addEventListener('resize', function() {
+                if (stars) {
+                    stars.innerHTML = '';
+                    createStars();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
