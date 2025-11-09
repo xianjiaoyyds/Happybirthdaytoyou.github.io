@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流动星空生日贺卡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        /* 背景：黑色渐变灰色 + 流动星空 */
+        body {
+            background: linear-gradient(to bottom, #0a0a0a 0%, #222222 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s;
+        }
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200%;
+            z-index: 0;
+            animation: starFlow 60s linear infinite;
+        }
+
+        /* 首页进入按钮：灰色方框+白边无圆角 */
+        #enterBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 40px;
+            background: #888;
+            color: white;
+            border: 2px solid white;
+            border-radius: 0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+        #enterBtn:hover {
+            background: #666;
+        }
+
+        /* 加载文字容器：宽度缩减+滚动+两侧对齐 */
+        .text-container {
+            position: relative;
+            width: 450px;
+            height: 300px;
+            margin: 50px auto 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 20px;
+            line-height: 1.8;
+            overflow-y: auto;
+            z-index: 5;
+            text-align: left;
+        }
+        .text-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .text-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        /* 弹窗功能按钮：居中显示 */
+        #popupBtn {
+            display: block;
+            margin: 0 auto 50px;
+            padding: 12px 30px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+            position: relative;
+        }
+        #popupBtn:hover {
+            background: #3182ce;
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+        }
+
+        /* 弹窗样式：固定大小+柔和背景+关闭按钮 */
+        .popup {
+            position: fixed;
+            width: 200px;
+            height: 80px;
+            padding: 15px;
+            padding-top: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            z-index: 1000;
+            /* 兼容定位 */
+            top: 0;
+            left: 0;
+        }
+
+        /* 弹窗关闭按钮 */
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.1);
+            color: #666;
+            font-size: 12px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: rgba(0,0,0,0.2);
+            color: #333;
+        }
+
+        /* 隐藏内容容器（兼容旧浏览器） */
+        .content-wrapper {
+            display: none;
+            visibility: hidden;
+        }
+        .content-wrapper.show {
+            display: block;
+            visibility: visible;
+        }
+
+        /* 星星动画 */
+        @keyframes twinkle {
+            from { opacity: 0.2; }
+            to { opacity: 1; }
+        }
+        @keyframes starFlow {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <div id="stars"></div>
+    <button id="enterBtn">点击进入生日贺卡</button>
+    <div class="content-wrapper" id="contentWrapper">
+        <div class="text-container" id="birthdayText"></div>
+        <button id="popupBtn">点击生成生日祝福弹窗</button>
+    </div>
+
+    <script>
+        // 兼容处理：获取DOM元素（兼容旧浏览器）
+        function getEl(id) {
+            return document.getElementById(id) || document.all[id];
+        }
+
+        // 1. 生成流动星空
+        const stars = getEl('stars');
+        function createStars() {
+            if (!stars) return;
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                star.style.opacity = Math.random() * 0.8 + 0.2;
+                star.style.animation = 'twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate';
+                star.style.top = `${Math.random() * window.innerHeight * 2}px`;
+                star.style.left = `${Math.random() * window.innerWidth}px`;
+                stars.appendChild(star);
+            }
+        }
+        createStars();
+
+        // 2. 生日贺卡内容（打字机效果）
+        const birthdayContent = `🎂 亲爱的小伙伴，生日快乐！🎂
+
+愿你的世界里，
+星光温柔，晚风轻拂，
+所有美好都如期而至。
+
+愿你每一岁都奔走在热爱里，
+平安喜乐，万事胜意，
+眼里有光，心中有爱，
+未来的日子闪闪发光！
+
+愿友谊长存，
+快乐无限，
+生日安康，岁岁欢愉！
+`;
+
+        // 3. 进入贺卡功能（兼容所有浏览器）
+        const enterBtn = getEl('enterBtn');
+        const contentWrapper = getEl('contentWrapper');
+        const birthdayText = getEl('birthdayText');
+        let isTyped = false;
+
+        // 兼容事件绑定
+        function addEvent(el, type, handler) {
+            if (el.addEventListener) {
+                el.addEventListener(type, handler, false);
+            } else if (el.attachEvent) {
+                el.attachEvent('on' + type, handler);
+            } else {
+                el['on' + type] = handler;
+            }
+        }
+
+        addEvent(enterBtn, 'click', function() {
+            enterBtn.style.display = 'none';
+            contentWrapper.className = 'content-wrapper show'; // 兼容显示
+
+            if (!isTyped && birthdayText) {
+                let index = 0;
+                const typeInterval = setInterval(function() {
+                    if (index < birthdayContent.length) {
+                        birthdayText.textContent += birthdayContent[index];
+                        index++;
+                        birthdayText.scrollTop = birthdayText.scrollHeight;
+                    } else {
+                        clearInterval(typeInterval);
+                        i
