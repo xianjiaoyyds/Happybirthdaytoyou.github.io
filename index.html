@@ -18,6 +18,8 @@
             min-height: 100vh;
             overflow: hidden;
             transition: background 0.5s;
+            /* 修复GitHub环境下的层叠问题 */
+            position: relative;
         }
         #stars {
             position: fixed;
@@ -29,30 +31,36 @@
             animation: starFlow 60s linear infinite;
         }
 
-        /* 首页进入按钮：灰色方框+白边无圆角 */
+        /* 首页进入按钮：增强点击区域，修复层叠 */
         #enterBtn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 15px 40px;
+            padding: 18px 45px;
             background: #888;
             color: white;
             border: 2px solid white;
             border-radius: 0;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
             transition: background 0.3s;
-            z-index: 10;
+            z-index: 9999; /* 提升层级，避免被遮挡 */
+            outline: none;
+            /* 修复GitHub下点击区域失效 */
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
         }
         #enterBtn:hover {
             background: #666;
         }
 
-        /* 加载文字容器：宽度缩减+滚动+两侧对齐 */
+        /* 加载文字容器：宽度适配GitHub Pages */
         .text-container {
             position: relative;
-            width: 450px;
+            width: 90%; /* 改为百分比，适配不同屏幕 */
+            max-width: 450px; /* 保留最大宽度 */
             height: 300px;
             margin: 50px auto 30px;
             padding: 20px;
@@ -62,7 +70,7 @@
             font-size: 20px;
             line-height: 1.8;
             overflow-y: auto;
-            z-index: 5;
+            z-index: 10;
             text-align: left;
         }
         .text-container::-webkit-scrollbar {
@@ -73,7 +81,7 @@
             border-radius: 4px;
         }
 
-        /* 弹窗功能按钮：居中显示 */
+        /* 弹窗功能按钮：增强层级 */
         #popupBtn {
             display: block;
             margin: 0 auto 50px;
@@ -87,6 +95,7 @@
             transition: all 0.3s;
             z-index: 10;
             position: relative;
+            outline: none;
         }
         #popupBtn:hover {
             background: #3182ce;
@@ -108,8 +117,7 @@
             text-align: center;
             font-size: 14px;
             color: #333;
-            z-index: 1000;
-            /* 兼容定位 */
+            z-index: 9998;
             top: 0;
             left: 0;
         }
@@ -132,23 +140,27 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            outline: none;
         }
         .close-btn:hover {
             background: rgba(0,0,0,0.2);
             color: #333;
         }
 
-        /* 隐藏内容容器（兼容旧浏览器） */
+        /* 内容容器：修复GitHub下显示问题 */
         .content-wrapper {
             display: none;
             visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
-        .content-wrapper.show {
+        .content-wrapper.active {
             display: block;
             visibility: visible;
+            opacity: 1;
         }
 
-        /* 星星动画 */
+        /* 星星动画：修复GitHub下动画失效 */
         @keyframes twinkle {
             from { opacity: 0.2; }
             to { opacity: 1; }
@@ -156,6 +168,15 @@
         @keyframes starFlow {
             0% { transform: translateY(0); }
             100% { transform: translateY(-100%); }
+        }
+        /* 兼容GitHub Pages动画前缀 */
+        @-webkit-keyframes twinkle {
+            from { opacity: 0.2; }
+            to { opacity: 1; }
+        }
+        @-webkit-keyframes starFlow {
+            0% { -webkit-transform: translateY(0); }
+            100% { -webkit-transform: translateY(-100%); }
         }
     </style>
 </head>
@@ -168,33 +189,32 @@
     </div>
 
     <script>
-        // 兼容处理：获取DOM元素（兼容旧浏览器）
-        function getEl(id) {
-            return document.getElementById(id) || document.all[id];
-        }
-
-        // 1. 生成流动星空
-        const stars = getEl('stars');
-        function createStars() {
-            if (!stars) return;
-            for (let i = 0; i < 200; i++) {
-                const star = document.createElement('div');
-                star.style.position = 'absolute';
-                star.style.width = `${Math.random() * 3 + 1}px`;
-                star.style.height = star.style.width;
-                star.style.backgroundColor = 'white';
-                star.style.borderRadius = '50%';
-                star.style.opacity = Math.random() * 0.8 + 0.2;
-                star.style.animation = 'twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate';
-                star.style.top = `${Math.random() * window.innerHeight * 2}px`;
-                star.style.left = `${Math.random() * window.innerWidth}px`;
-                stars.appendChild(star);
+        // 核心修复：避免GitHub Pages的DOM加载顺序问题
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 生成流动星空
+            const stars = document.getElementById('stars');
+            function createStars() {
+                if (!stars) return;
+                for (let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.style.position = 'absolute';
+                    star.style.width = `${Math.random() * 3 + 1}px`;
+                    star.style.height = star.style.width;
+                    star.style.backgroundColor = 'white';
+                    star.style.borderRadius = '50%';
+                    star.style.opacity = Math.random() * 0.8 + 0.2;
+                    // 兼容前缀动画
+                    star.style.animation = star.style.webkitAnimation = 
+                        'twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate';
+                    star.style.top = `${Math.random() * window.innerHeight * 2}px`;
+                    star.style.left = `${Math.random() * window.innerWidth}px`;
+                    stars.appendChild(star);
+                }
             }
-        }
-        createStars();
+            createStars();
 
-        // 2. 生日贺卡内容（打字机效果）
-        const birthdayContent = `🎂 亲爱的小伙伴，生日快乐！🎂
+            // 2. 生日贺卡内容（打字机效果）
+            const birthdayContent = `🎂 亲爱的小伙伴，生日快乐！🎂
 
 愿你的世界里，
 星光温柔，晚风轻拂，
@@ -210,34 +230,10 @@
 生日安康，岁岁欢愉！
 `;
 
-        // 3. 进入贺卡功能（兼容所有浏览器）
-        const enterBtn = getEl('enterBtn');
-        const contentWrapper = getEl('contentWrapper');
-        const birthdayText = getEl('birthdayText');
-        let isTyped = false;
+            // 3. 修复进入贺卡功能（GitHub Pages核心修复）
+            const enterBtn = document.getElementById('enterBtn');
+            const contentWrapper = document.getElementById('contentWrapper');
+            const birthdayText = document.getElementById('birthdayText');
+            let isTyped = false;
 
-        // 兼容事件绑定
-        function addEvent(el, type, handler) {
-            if (el.addEventListener) {
-                el.addEventListener(type, handler, false);
-            } else if (el.attachEvent) {
-                el.attachEvent('on' + type, handler);
-            } else {
-                el['on' + type] = handler;
-            }
-        }
-
-        addEvent(enterBtn, 'click', function() {
-            enterBtn.style.display = 'none';
-            contentWrapper.className = 'content-wrapper show'; // 兼容显示
-
-            if (!isTyped && birthdayText) {
-                let index = 0;
-                const typeInterval = setInterval(function() {
-                    if (index < birthdayContent.length) {
-                        birthdayText.textContent += birthdayContent[index];
-                        index++;
-                        birthdayText.scrollTop = birthdayText.scrollHeight;
-                    } else {
-                        clearInterval(typeInterval);
-                        i
+            // 确保按钮
